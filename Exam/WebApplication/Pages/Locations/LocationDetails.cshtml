@@ -1,0 +1,39 @@
+@page
+@using Domain
+@using System.ComponentModel
+@model WebApplication.Pages.Locations.LocationDetails
+
+@{
+    ViewData["Title"] = "Add Location";
+}
+
+<form method="post">
+    <div class="form-group">
+        <label><strong>Location name:</strong></label>
+        <dd>@Html.DisplayFor(model => model.Location.LocationName)</dd>
+    </div>
+
+    <div class="form-group">
+        <label><strong>Ingredients at location:</strong></label>
+        @foreach (var ingredient in Model.Location.Ingredients!)
+        {
+            <div class="form-group row">
+                <dd>@ingredient.Amount @GetUnitDescription(@ingredient.Unit) @ingredient.IngredientName</dd>
+            </div>
+            
+        }
+    </div>
+</form>
+
+<div>
+    <a asp-page="./EditLocation" asp-route-locationId="@Model.Location.LocationId">Edit location</a> |
+    <a asp-page="./Locations">Back to List</a>
+</div>
+
+@functions
+{
+    string GetUnitDescription(Unit? unit)
+    {
+        return unit!.GetAttributeOfType<DescriptionAttribute>()!.Description;
+    }
+}

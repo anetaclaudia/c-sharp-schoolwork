@@ -1,0 +1,106 @@
+@page
+@using System.ComponentModel
+@using Domain
+@model WebApplication.Pages.Locations.EditLocation
+
+@{
+    ViewData["Title"] = "Editing location";
+}
+
+<form method="post">
+    <div class="form-group">
+        <label><strong>Location name:</strong></label>
+        <div class="col-sm-10">
+                <input asp-for="Location.LocationName" class="form-control" placeholder="In example at grandmother's">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label><strong>Ingredients at location:</strong></label>
+        <div class="row">
+            <div class="col" id="nameDiv">
+                <label>Ingredient name</label>
+                @for (int i = 0; i < Model.Ingredients!.Count; i++)
+                {
+                    var locationIngredient = Model.Ingredients!.ElementAt(@i);
+                    <input type="text" minlength="1" class="form-control" placeholder="Enter in example flour" name="Ingredients[@i].IngredientName" value="@locationIngredient.IngredientName" required requiredToAdd>
+
+                }
+            </div>
+            
+            <div class="col" id="amountPerServingDiv">
+                <label>Ingredient amount</label>
+                @for (int i = 0; i < Model.Ingredients!.Count; i++)
+                {
+                    var locationIngredient = Model.Ingredients!.ElementAt(@i);
+                    <input type="number" min="1" class="form-control" placeholder="Enter in example 10" name="Ingredients[@i].Amount" value="@locationIngredient.Amount" required requiredToAdd>
+
+                }
+            </div>
+            
+            <div class="col" id="measurementTypeDiv">
+                <label>Measurement type</label>
+                @for (int i = 0; i < Model.Ingredients!.Count; i++)
+                {
+                    var locationIngredient = Model.Ingredients!.ElementAt(@i);
+                    <select class="form-control" name="Ingredients[@i].Unit">
+                        <option value="@locationIngredient.Unit">@locationIngredient.Unit</option>
+                        @foreach (Unit? unit in Enum.GetValues(typeof(Unit)))
+                        {
+                            if (unit != locationIngredient.Unit)
+                            {
+                                <option value="@unit">@unit</option>
+                            }
+                        }
+                    </select>
+                }
+                
+            </div>
+            <div class="col">
+                <input type="button" value="Add an ingredient" class="add btn-primary" id="add" />
+            </div>
+        </div>
+    </div>
+        <button type="submit" class="btn btn-primary" asp-route-locationId="@Model.Location!.LocationId">Save</button>
+</form>
+
+
+@section Scripts
+{ 
+    <script>
+            $(function () {
+                var nextId = @Model.Ingredients!.Count();
+                $('#add').on('click', function () {
+                    let valid = true;
+                      $('[requiredToAdd]').each(function() {
+                        if ($(this).is(':invalid') || !$(this).val()) valid = false;
+                      })
+                    if (!valid) return
+                    if (nextId === 0) { // for first it doesn't automatically increase
+                        nextId = 1
+                    }
+                    var name = $('<input type="text" class="form-control" placeholder="Enter ingredient name" name="Ingredients[' + nextId.toString() + '].IngredientName" value="" requiredToAdd>\r\n');
+                    var amountPerServing = $('<input type="number" min="1" class="form-control" placeholder="Enter ingredient amount" name="Ingredients[' + nextId.toString() + '].Amount" value="" requiredToAdd>\r\n');
+                    var measurementType =$('<select class="form-control" name="Ingredients[' + nextId.toString() + '].Unit" >\r\n')
+                    @foreach (Unit? unit in Enum.GetValues(typeof(Unit)))
+                    {
+                        @:measurementType.append('<option value="@unit">@unit</option>\r\n')
+                    }
+                    measurementType.append('</select>\r\n')
+                    $("#nameDiv").append(name);
+                    $("#amountPerServingDiv").append(amountPerServing);
+                    $("#measurementTypeDiv").append(measurementType);
+                    nextId++;
+                });
+            });
+    </script>
+
+}
+
+@functions
+{
+    string GetUnitDescription(Unit? unit)
+    {
+        return unit!.GetAttributeOfType<DescriptionAttribute>()!.Description;
+    }
+}

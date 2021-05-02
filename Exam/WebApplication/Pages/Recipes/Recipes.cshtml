@@ -1,0 +1,29 @@
+@page
+@model WebApplication.Pages.Recipes.RecipesModel
+@{ ViewData["Title"] = "Recipes"; }
+<nav class="navbar navbar-collapse">
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="" asp-page="/Recipes/AddRecipe">Add new recipe</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="" asp-page="/Recipes/FindRecipe">Find recipe</a>
+        </li>
+    </ul>
+</nav>
+
+<h3>All recipes</h3>
+<table>
+    <tbody>
+    @foreach (var item in Model.Recipes!)
+    {
+        var name = item.RecipeName;
+        <tr>
+            <td>
+                <a asp-page="./RecipeDetails" asp-route-recipeId="@item.RecipeId">@name</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+
+</table>

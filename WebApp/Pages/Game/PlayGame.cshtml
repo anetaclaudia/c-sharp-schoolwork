@@ -1,0 +1,152 @@
+﻿@page
+@using GameBrain
+@using System.ComponentModel
+@model WebApp.Pages.Game.PlayGame
+
+@{
+    ViewData["Title"] = "Game on!";
+}
+
+<h1>@Model.Game!.PlayerOne!.Name vs @Model.Game!.PlayerTwo!.Name</h1>
+<hr/>
+@if (Model.PlaceShips == false)
+{
+    @if (@Model.Game.WinningPlayer != null)
+{
+    <h1>@Model.Game.WinningPlayer WON!</h1>
+}
+@if (Model.Game.WinningPlayer == null)
+{
+    <h3>@Model.ControllingPlayer!.Name's turn</h3>
+
+    @if (Model.LastHitShip != null)
+    {
+        var isSunk = Model.LastHitShip.IsSunk();
+        if (isSunk)
+        {
+            <h3>@Model.LastHitShip.ShipType.ToString() has been sunk!</h3>
+        }
+        if (!isSunk)
+        {
+            <h3>Hit!</h3>
+        }
+    }
+    <form method="post">
+        <table class="table table-dark" style="width: initial;">
+            <tbody>
+            @for (int row = 0; row < @Model.Game.Height; row++)
+            {
+                <tr>
+                    @for (int ownColumn = 0; ownColumn < @Model.Game.Width; ownColumn++)
+                    {
+                        Panel panel = @Model.OpposingPlayer!.Panels.At(row, ownColumn);
+                        string description = GetPanelDescription(panel);
+                        <td>
+                            @if (panel.IsOccupied)
+                            {
+                                description = " ";
+                            }
+                            @if (description.Equals(" "))
+                            {
+                                @if (!Model.Replay)
+                                {
+                                    <button asp-route-column="@ownColumn" asp-route-row="@row"
+                                            asp-route-gameId="@Model.Game.GameId"
+                                            asp-route-controllingPlayerId="@Model.ControllingPlayer.PlayerId">
+                                    </button>
+                                }
+                                @if (Model.Replay)
+                                {
+                                    <button>
+                                    </button>
+                                }
+                            }
+
+                            @if (!description.Equals(" "))
+                            {
+                                <button style="color: greenyellow" disabled>
+                                    @description
+                                </button>
+                            }
+                        </td>
+                    }
+                </tr>
+            }
+            </tbody>
+        </table>
+        @if (Model.Replay)
+        {
+            int nextMoveCount = @Model.MoveCount + 1;
+            int lastMoveCount = @Model.MoveCount - 1;
+            if (lastMoveCount >= 0)
+            {
+                <button class="btn btn-primary" asp-route-gameId="@Model.Game.GameId" asp-route-moveCount="@lastMoveCount">
+                    Previous move
+                </button>
+            }
+            
+            @if (nextMoveCount < Model.Game.Moves.Count)
+            {
+                <button class="btn btn-primary" asp-route-gameId="@Model.Game.GameId" asp-route-moveCount="@nextMoveCount">
+                    Next move
+                </button>
+            }
+        }
+    </form>
+}
+}
+
+@if (Model.PlaceShips == true)
+{
+    <h3>@Model.ControllingPlayer!.Name's @Model.ShipBeingPlaced!.ShipType with size: @Model.ShipBeingPlaced.Width</h3>
+    if (!Model.ShipOrientation)
+    {
+        <h5>Placing Horizontally</h5>
+    }
+    if (Model.ShipOrientation)
+    {
+        <h5>Placing Vertically</h5>
+    }
+    <form method="post">
+        <button class="btn btn-primary" asp-route-placeShipsGameId="@Model.Game.GameId" asp-route-rotation="@Model.ShipOrientation">
+                Rotate ship
+        </button>
+        <table class="table table-dark" style="width: initial;">
+            <tbody>
+            @for (int row = 0; row < @Model.Game.Height; row++)
+            {
+                <tr>
+                    @for (int ownColumn = 0; ownColumn < @Model.Game.Width; ownColumn++)
+                    {
+                        Panel panel = @Model.ControllingPlayer.Panels.At(row, ownColumn);
+                        string description = GetPanelDescription(panel);
+                        if (description != " ")
+                        {
+                            <td>
+                                <button style="color: greenyellow" disabled>
+                                    @description
+                                </button>
+                            </td>
+                        }
+                        if (description == " ")
+                        {
+                            <td>
+                                <button style="color: greenyellow" asp-route-column="@ownColumn" asp-route-row="@row" asp-route-placeShipsGameId="@Model.Game.GameId" asp-route-rotation="@Model.ShipOrientation">
+                                    @description
+                                </button>
+                            </td>
+                        }
+                    }
+                </tr>
+            }
+            </tbody>
+        </table>
+    </form>
+}
+@functions
+{
+    string GetPanelDescription(Panel panel)
+    {
+        return panel.OccupationType.GetAttributeOfType<DescriptionAttribute>()!.Description;
+    }
+}

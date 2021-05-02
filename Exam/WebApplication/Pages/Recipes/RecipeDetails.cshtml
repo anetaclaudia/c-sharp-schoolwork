@@ -1,0 +1,76 @@
+@page
+@using Domain
+@using System.ComponentModel
+@model WebApplication.Pages.Recipes.RecipeDetails
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details about a recipe</h1>
+
+<body>
+<form method="post">
+    <div class="form-group">
+        <label><strong>Recipe name</strong></label>
+        <dd>@Html.DisplayFor(model => model.Recipe.RecipeName)</dd>
+    </div>
+    <div class="form-group">
+            <label><strong>Recipe category</strong></label>
+            <dd>@GetCategoryDescription(Model.Recipe.RecipeCategory)</dd>
+        </div>
+    <div class="form-group">
+        <label><strong>Preparation time in minutes</strong></label>
+        <dd>@Html.DisplayFor(model => model.Recipe.PreparationTime)</dd>
+    </div>
+    
+    <div class="form-group">
+        <label><strong>How do you prepare this recipe?</strong></label>
+        <dd>@Html.DisplayFor(model => model.Recipe.Preparation)</dd>
+    </div>
+    
+    <div class="form-group">
+        <label><strong>Ingredients needed:</strong></label>
+        @foreach (var ingredient in Model.Recipe.RecipeIngredients!)
+        {
+            var amount = @ingredient.AmountPerServing;
+            if (Model.ServingPeopleAmount > 0 && Model.ServingPeopleAmount != null)
+            {
+                amount *= Model.ServingPeopleAmount;
+            }
+            <div class="form-group row">
+                <dd>@amount @GetUnitDescription(@ingredient.Unit) @ingredient.Name</dd>
+            </div>
+            
+        }
+    </div>
+    <div method="get" class="form-inline">
+    <div class="form-group mb-2 ">
+        <label>Amount of people served</label>
+      </div>
+      <div class="form-group mx-sm-3 mb-2">
+        <input type="number" min="1" class="form-control" asp-for="ServingPeopleAmount" placeholder="1" required>
+      </div>
+        <button type="submit" class="btn btn-primary mb-2" asp-route-recipeId="@Model.Recipe.RecipeId">Calculate</button>
+    </div>
+</form>
+</body>
+
+<div>
+    <a asp-page="./EditRecipe" asp-route-recipeId="@Model.Recipe.RecipeId">Edit recipe</a> |
+    <a asp-page="./Recipes">Back to List</a>
+</div>
+
+
+@functions
+{
+    string GetCategoryDescription(RecipeCategory? category)
+    {
+        return category!.GetAttributeOfType<DescriptionAttribute>()!.Description;
+    }
+        
+    string GetUnitDescription(Unit? unit)
+    {
+        return unit!.GetAttributeOfType<DescriptionAttribute>()!.Description;
+    }
+}

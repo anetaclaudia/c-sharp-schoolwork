@@ -1,0 +1,75 @@
+@page
+@using Domain
+@model WebApplication.Pages.Locations.AddLocation
+
+@{
+    ViewData["Title"] = "Add Location";
+}
+<form method="post">
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label">Enter name for your location</label>
+    <div class="col-sm-10">
+        <input asp-for="LocationName" class="form-control" placeholder="In example at grandmother's">
+    </div>
+</div>
+
+
+<h3>Add ingredients to your location</h3>
+    <div class="row">
+        <div class="col" id="nameDiv">
+            <label>Ingredient name</label>
+            <input type="text" minlength="1" class="form-control" placeholder="Enter in example flour" name="Ingredients[0].IngredientName" value="" required requiredToAdd>
+        </div>
+            
+        <div class="col" id="amountPerServingDiv">
+            <label>Ingredient amount</label>
+            <input type="number" min="1" class="form-control" placeholder="Enter in example 10" name="Ingredients[0].Amount" value="" required requiredToAdd>
+        </div>
+            
+        <div class="col" id="measurementTypeDiv">
+            <label>Measurement type</label>
+            <select class="form-control" name="Ingredients[0].Unit">
+                @foreach (Unit? unit in Enum.GetValues(typeof(Unit)))
+                {
+                    <option value="@unit">@unit</option>
+                }
+            </select>
+        </div>
+        <div class="col">
+            <input type="button" value="Add an ingredient" class="add btn-primary" id="add" />
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary mb-2">Submit</button>
+</form>
+
+@section Scripts
+{ 
+    <script>
+            $(function () {
+                var nextId = @Model.Ingredients!.Count();
+                $('#add').on('click', function () {
+                    let valid = true;
+                      $('[requiredToAdd]').each(function() {
+                        if ($(this).is(':invalid') || !$(this).val()) valid = false;
+                      })
+                    if (!valid) return
+                    if (nextId === 0) { // for first it doesn't automatically increase
+                        nextId = 1
+                    }
+                    var name = $('<input type="text" class="form-control" placeholder="Enter ingredient name" name="Ingredients[' + nextId.toString() + '].IngredientName" value="" requiredToAdd>\r\n');
+                    var amountPerServing = $('<input type="number" min="1" class="form-control" placeholder="Enter ingredient amount" name="Ingredients[' + nextId.toString() + '].Amount" value="" requiredToAdd>\r\n');
+                    var measurementType =$('<select class="form-control" name="Ingredients[' + nextId.toString() + '].Unit" >\r\n')
+                    @foreach (Unit? unit in Enum.GetValues(typeof(Unit)))
+                    {
+                        @:measurementType.append('<option value="@unit">@unit</option>\r\n')
+                    }
+                    measurementType.append('</select>\r\n')
+                    $("#nameDiv").append(name);
+                    $("#amountPerServingDiv").append(amountPerServing);
+                    $("#measurementTypeDiv").append(measurementType);
+                    nextId++;
+                });
+            });
+    </script>
+
+}

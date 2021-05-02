@@ -1,0 +1,36 @@
+﻿@page
+@model WebApp.Pages.Game.SavedGames
+
+@{
+    ViewData["Title"] = "Saved games";
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Saved games
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.SavedGame!) {
+    var name = item.SavedGameId + ": " + item.PlayerOne!.Name + " vs " + item.PlayerTwo!.Name;
+    if (item.WinningPlayer != null)
+    {
+        name += " - " + item.WinningPlayer + " won!";
+    }
+        <tr>
+            <td>
+                @name
+            </td>
+            <td>
+                <a asp-page="./PlayGame" asp-route-gameId="@item.SavedGameId">Play this game</a>
+            </td>
+            <td>
+                <a asp-page="./PlayGame" asp-route-replayGameId="@item.SavedGameId">Replay game moves</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

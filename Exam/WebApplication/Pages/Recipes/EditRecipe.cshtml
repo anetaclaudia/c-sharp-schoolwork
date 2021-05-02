@@ -1,0 +1,133 @@
+@page
+@using System.ComponentModel
+@using Domain
+@model WebApplication.Pages.Recipes.EditRecipe
+
+@{
+    ViewData["Title"] = "Edit";
+}
+<head>
+    <title>Edit recipe</title>
+</head>
+
+<body>
+<form method="post">
+    <div class="form-group">
+        <label>Recipe name</label>
+        <input asp-for="Recipe!.RecipeName" class="form-control" placeholder="Enter recipe name">
+    </div>
+    <div class="form-group">
+        <label>Preparation time in minutes</label>
+        <input type="number" min="1" asp-for="Recipe!.PreparationTime" class="form-control" placeholder="Enter preparation time in minutes">
+    </div>
+    <div class="form-group">
+        <label>Choose category for your recipe</label>
+        <select asp-for="Recipe!.RecipeCategory" class="form-control">
+            @foreach (RecipeCategory? category in Enum.GetValues(typeof(RecipeCategory)))
+            {
+                <option value="@category">@GetCategoryDescription(category)</option>
+            }
+        </select>
+    </div>
+
+
+    <div class="row">
+        <div class="col" id="nameDiv">
+            <label>Ingredient name</label>
+
+            @for (int i = 0; i < Model.Ingredients!.Count; i++)
+            {
+                var recipeIngredient = Model.Ingredients!.ElementAt(@i);
+                <input type="text" minlength="1" class="form-control" placeholder="Enter ingredient name" name="Ingredients[@i].Name" value="@recipeIngredient.Name" requiredToAdd>
+            }
+        </div>
+
+        <div class="col" id="amountPerServingDiv">
+            <label>Ingredient amount</label>
+            @for (int i = 0; i < Model.Ingredients!.Count; i++)
+            {
+                var recipeIngredient = Model.Ingredients!.ElementAt(@i);
+                <input type="number" min="1" class="form-control" placeholder="Enter ingredient amount" name="Ingredients[@i].AmountPerServing" value="@recipeIngredient.AmountPerServing" requiredToAdd>
+            }
+
+        </div>
+
+        <div class="col" id="measurementTypeDiv">
+            <label>Measurement type</label>
+            @for (int i = 0; i < Model.Ingredients!.Count; i++)
+            {
+                var recipeIngredient = Model.Ingredients!.ElementAt(@i);
+                <select class="form-control" name="Ingredients[@i].Unit">
+                    <option value="@recipeIngredient.Unit">@recipeIngredient.Unit</option>
+                    @foreach (Unit? unit in Enum.GetValues(typeof(Unit)))
+                    {
+                        if (unit != recipeIngredient.Unit)
+                        {
+                            <option value="@unit">@unit</option>
+                        }
+                    }
+                </select>
+            }
+
+        </div>
+        <div class="col">
+            <input type="button" value="Add an ingredient" class="add btn-primary" id="add"/>
+        </div>
+    </div>
+
+
+    <div class="form-group">
+        <label>How do you prepare this recipe?</label>
+        <textarea asp-for="Recipe!.Preparation" class="form-control" rows="5"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary" asp-route-recipeId="@Model.Recipe!.RecipeId">Save</button>
+</form>
+<div>
+    <a asp-page="/Recipes/Recipes">Back to List</a>
+</div>
+</body>
+
+@section Scripts
+{ 
+     <script>
+            $(function () {
+                var nextId = @Model.Ingredients!.Count();
+                $('#add').on('click', function () {
+                    let valid = true;
+                      $('[requiredToAdd]').each(function() {
+                        if ($(this).is(':invalid') || !$(this).val()) valid = false;
+                      })
+                    if (!valid) return
+                    if (nextId === 0) { // for first it doesn't automatically increase
+                        nextId = 1
+                    }
+                    var name = $('<input type="text" class="form-control" placeholder="Enter ingredient name" name="Ingredients[' + nextId.toString() + '].Name" value="" requiredToAdd>\r\n');
+                    var amountPerServing = $('<input type="number" min="1" class="form-control" placeholder="Enter ingredient amount" name="Ingredients[' + nextId.toString() + '].AmountPerServing" value="" requiredToAdd>\r\n');
+                    var measurementType =$('<select class="form-control" name="Ingredients[' + nextId.toString() + '].Unit" >\r\n')
+                    @foreach (Unit? unit in Enum.GetValues(typeof(Unit)))
+                    {
+                        @:measurementType.append('<option value="@unit">@unit</option>\r\n')
+                    }
+                    measurementType.append('</select>\r\n')
+                    $("#nameDiv").append(name);
+                    $("#amountPerServingDiv").append(amountPerServing);
+                    $("#measurementTypeDiv").append(measurementType);
+                    nextId++;
+                });
+            });
+    </script>
+
+}
+
+@functions
+{
+    string GetCategoryDescription(RecipeCategory? category)
+    {
+        return category!.GetAttributeOfType<DescriptionAttribute>()!.Description;
+    }
+
+    string GetUnitDescription(Unit? unit)
+    {
+        return unit!.GetAttributeOfType<DescriptionAttribute>()!.Description;
+    }
+}

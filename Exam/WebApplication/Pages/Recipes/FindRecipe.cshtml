@@ -1,0 +1,81 @@
+@page
+@using Domain
+@using System.ComponentModel
+@model WebApplication.Pages.Recipes.FindRecipe
+
+@{
+    ViewData["Title"] = "Search recipe";
+}
+
+<h1>Search recipe</h1>
+
+<form method="post">
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Search by name</label>
+        <div class="col-sm-10">
+            <input asp-for="SearchName" class="form-control" id="inputName" placeholder="Recipe name">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Search with ingredient</label>
+        <div class="col-sm-10">
+            <input asp-for="SearchIngredientPositive" class="form-control" id="inputIngredient" placeholder="Recipe ingredient">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Search without ingredient</label>
+        <div class="col-sm-10">
+            <input asp-for="SearchIngredientNegative" class="form-control" id="inputNotIngredient" placeholder="Recipe ingredient">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label">How much time do you have?</label>
+        <div class="col-sm-10">
+            <input asp-for="SearchTime" class="form-control" id="inputTime" placeholder="Time in minutes">
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Choose category for your recipe</label>
+        <select asp-for="RecipeCategory" class="form-control">
+            <option>Any</option>
+            @foreach (RecipeCategory? category in Enum.GetValues(typeof(RecipeCategory)))
+            {
+                <option value="@category">@GetCategoryDescription(category)</option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+            <label>Choose location from which to choose incredients</label>
+        <select asp-for="LocationId" class="form-control">
+            <option>Any</option>
+            @foreach (var location in Model.Locations!)
+            {
+                <option value="@location.LocationId">@location.LocationName</option>
+            }
+        </select>
+        </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+<h3>Display recipes</h3>
+<table>
+    <tbody>
+    @foreach (var item in Model.Recipes!)
+    {
+        var name = item.RecipeName;
+        <tr>
+            <td>
+                <a asp-page="./RecipeDetails" asp-route-recipeId="@item.RecipeId">@name</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@functions
+{
+    string GetCategoryDescription(RecipeCategory? category)
+    {
+        return category!.GetAttributeOfType<DescriptionAttribute>()!.Description;
+    }
+}

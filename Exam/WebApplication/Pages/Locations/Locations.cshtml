@@ -1,0 +1,29 @@
+@page
+@model WebApplication.Pages.Locations.LocationsModel
+
+@{
+    ViewData["Title"] = "Locations";
+}
+<nav class="navbar navbar-collapse">
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="" asp-page="/Locations/AddLocation">Add new location</a>
+        </li>
+    </ul>
+</nav>
+
+<h3>All locations</h3>
+<table>
+    <tbody>
+    @foreach (var item in Model.Locations!)
+    {
+        var name = item.LocationName;
+        <tr>
+            <td>
+                <a asp-page="./LocationDetails" asp-route-locationId="@item.LocationId">@name</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+
+</table>
